@@ -7,7 +7,9 @@ int   main(int argc, char **argv)
 {
   SDL_Window		*window;
   SDL_Renderer	*rend;
-	SDL_Texture		*img = IMG_LoadTexture(rend, "./images/range.png");
+	SDL_Rect 			img_pos = {0, 0, 600, 480};
+	SDL_Texture		*img;
+	SDL_Texture		*tex;
 	int frame_nb;
 	int timer;
 	int i;
@@ -20,8 +22,10 @@ int   main(int argc, char **argv)
       fprintf(stderr,"MAIN\nFailed SDL initialization: \"%s\"\n\n", SDL_GetError());
       return -1;
   }
-	window = SDL_CreateWindow("Hello!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 480, 0);
-	rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	window 	= SDL_CreateWindow("Hello!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 480, 0);
+	rend 		= SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	img 		= IMG_LoadTexture(rend, "./images/range.png");
+	tex 		= SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 600, 480);
 	frame_nb = 30;
 
 	// TEST 1
@@ -76,8 +80,7 @@ int   main(int argc, char **argv)
 
 	// TEST 4
 
-	nb = 1;
-	SDL_Rect 		img_pos = {0, 0, 600, 480};
+	/*nb = 1;
 	for (j = 0; j < frame_nb; j++)
 	{
 		timer = SDL_GetTicks();
@@ -92,9 +95,33 @@ int   main(int argc, char **argv)
 			SDL_RenderPresent(rend);
 		}
 		fprintf(stderr, "Test 4 took %dms.\n", (SDL_GetTicks() - timer));
+	}*/
+
+	// TEST 5
+
+	nb = 1;
+	for (j = 0; j < frame_nb; j++)
+	{
+		timer = SDL_GetTicks();
+		for (i = 0; i < nb; i++)
+		{
+			SDL_RenderClear(rend);
+			SDL_RenderPresent(rend);
+			SDL_SetRenderTarget(rend, tex);
+			for (k = 0; k < 150; k++)
+			{
+				SDL_RenderCopy(rend, img, NULL, &img_pos);
+			}
+			SDL_SetRenderTarget(rend, NULL);
+			SDL_RenderCopy(rend, img, NULL, &img_pos);
+			SDL_RenderPresent(rend);
+		}
+		fprintf(stderr, "Test 5 took %dms.\n", (SDL_GetTicks() - timer));
 	}
 
+	fprintf(stderr, "\n\nFinished: \"%s\"\n", SDL_GetError());
 	SDL_DestroyTexture(img);
+	SDL_DestroyTexture(tex);
 	IMG_Quit();
 	SDL_DestroyRenderer(rend);
 	SDL_DestroyWindow(window);
